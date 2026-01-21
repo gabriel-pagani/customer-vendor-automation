@@ -22,7 +22,8 @@ def create_new_customer_vendor(
 		stateCode: str,
 		cityInternalId: str,
 		phoneNumber: str,
-		email: str
+		email: str,
+        contributor: int
 ):
     try:
         load_dotenv(override=True)
@@ -67,6 +68,8 @@ def create_new_customer_vendor(
                     "email": email
                 }
             },
+            "contributor": contributor,
+            "fuelOperationType": 3,
             "complementaryFields": {
                 "codcoligada": int(companyId),
                 "codcfo": code
