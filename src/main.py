@@ -1,7 +1,7 @@
 from apis.customer_vendor import create_new_customer_vendor
 from apis.receitaws import cnpj_lookup
 
-resp = cnpj_lookup("5", "F99999", 2, "18.236.120/0001-58", "123456789")
+resp = cnpj_lookup("5", "F99999", 2, "07.150.434/0001-17", "256016631")
 
 create_new_customer_vendor(
     companyId=resp["companyId"],
