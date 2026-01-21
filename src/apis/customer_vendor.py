@@ -18,7 +18,6 @@ def create_new_customer_vendor(
 		number: str,
 		districtType: str,
 		district: str,
-		countryInternalId: str,
 		stateCode: str,
 		cityInternalId: str,
 		phoneNumber: str,
@@ -55,7 +54,8 @@ def create_new_customer_vendor(
                 "districtType": districtType,
                 "district": district,
                 "country": {
-                    "countryInternalId": countryInternalId
+                    "countryInternalId": "1",
+                    "countryDescription": "Brasil"
                 },
                 "state": {
                     "stateCode": stateCode
