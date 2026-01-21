@@ -9,8 +9,8 @@ def main():
     load_dotenv(override=True)
 
     api_url = os.getenv("API_URL")
-    user = os.getenv("USER")
-    pwd = os.getenv("PWD")
+    user = os.getenv("API_USER")
+    pwd = os.getenv("API_USER_PWD")
 
     session = requests.Session()
     session.auth = HTTPBasicAuth(user, pwd)
