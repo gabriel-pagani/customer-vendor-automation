@@ -1,3 +1,4 @@
+from utils.formatter import format_name
 import requests
 
 
@@ -12,7 +13,7 @@ def cnpj_lookup(companyId: str, code: str, type: int, contributor: int, cnpj: st
         "contributor": contributor,
 
         "shortName": resp["fantasia"].title().strip() if resp["fantasia"] else resp["nome"].title().strip(),
-        "name": resp["nome"].title().strip(),
+        "name": format_name(resp["nome"]),
         "mainNIF": resp["cnpj"].strip(),
         "stateRegister": stateRegister,
         "zipCode": resp["cep"].replace(".", "").replace("-", "").strip(),
