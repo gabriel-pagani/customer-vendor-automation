@@ -36,6 +36,7 @@ def format_zipcode(zipCode: str) -> str:
     return zipCode.replace(".", "").replace("-", "").strip()
 
 
+# Conferir os tipos de ruas
 def format_street(street: str) -> list:
     street = street.strip().upper()
     street_type = street.split()[0]
@@ -57,6 +58,7 @@ def format_street(street: str) -> list:
         return ["Rua", street.title()]
 
 
+# Conferir os tipos de bairros
 def format_district(district: str) -> list:
     district = district.strip().upper()
     district_type = district.split()[0]

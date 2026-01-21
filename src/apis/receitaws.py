@@ -9,7 +9,7 @@ def cnpj_lookup(codcoligada: str, codcfo: str, cnpj: str, ie: str = ""):
     response = {
         "companyId": codcoligada,
         "code": codcfo,
-        "type": 3 if codcfo.upper().startswith('C') else 2,
+        "type": 3 if codcfo.upper().startswith('C') else 2,  # Conferir os tipos de cadastro
         "contributor": 2 if ie and "isento" in ie.strip().lower() else (1 if ie else 0),
 
         "shortName": suffix_remover(format_name(resp["fantasia"])) if resp["fantasia"] else suffix_remover(format_name(resp["nome"])),
