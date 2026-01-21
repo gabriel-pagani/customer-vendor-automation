@@ -11,21 +11,21 @@ def cnpj_lookup(companyId: str, code: str, type: int, contributor: int, cnpj: st
         "type": type,
         "contributor": contributor,
 
-        "shortName": resp["fantasia"] if resp["fantasia"] else resp["nome"],
-        "name": resp["nome"],
-        "mainNIF": resp["cnpj"],
+        "shortName": resp["fantasia"].title().strip() if resp["fantasia"] else resp["nome"].title().strip(),
+        "name": resp["nome"].title().strip(),
+        "mainNIF": resp["cnpj"].strip(),
         "stateRegister": None,
         "zipCode": resp["cep"].replace(".", "").replace("-", "").strip(),
         "streetType": None,
-        "streetName": resp["logradouro"],
-        "number": resp["numero"],
+        "streetName": resp["logradouro"].title().strip(),
+        "number": resp["numero"].upper().strip(),
         "districtType": None,
-        "district": resp["bairro"],
+        "district": resp["bairro"].title().strip(),
         "countryInternalId": None,
-        "stateCode": resp["uf"],
+        "stateCode": resp["uf"].upper().strip(),
         "cityInternalId": None,
         "phoneNumber": resp["telefone"].replace("(", "").replace(")", "").replace(" ", "").replace("-", "").strip(),
-        "email": resp["email"]
+        "email": resp["email"].lower().strip()
     }
     
     return response
