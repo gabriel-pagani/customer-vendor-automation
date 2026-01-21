@@ -36,6 +36,27 @@ def format_zipcode(zipCode: str) -> str:
     return zipCode.replace(".", "").replace("-", "").strip()
 
 
+def format_street(street: str) -> list:
+    street = street.strip().upper()
+    street_type = street.split()[0]
+    
+    street_types = {
+        "AV": "Avenida",
+        "R": "Rua",
+        "ROD": "Rodovia",
+        "EST": "Estrada",
+        "AL": "Alameda",
+        # Adicionar mais conforme necessário
+    }
+
+    if street_type in street_types:
+        street = re.sub(f'{street_type} ', '', street)
+        street_type = street_types[street_type]
+        return [street_type, street.title()]
+    else:
+        return ["Rua", street.title()]
+
+
 def format_phone(phone: str) -> str:
     phone = phone.replace("(", "").replace(")", "").replace("-", "").replace(" ", "")
     phone = phone.split("/")[0].strip()  # usa apenas o primeiro quando houver mais de um
