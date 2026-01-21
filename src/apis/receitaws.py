@@ -17,13 +17,13 @@ def cnpj_lookup(companyId: str, code: str, type: int, cnpj: str, stateRegister: 
         "mainNIF": resp["cnpj"].strip(),
         "stateRegister": stateRegister,
         "zipCode": format_zipcode(resp["cep"]),
-        "streetType": None,  # Formatar
+        "streetType": "",  # Formatar
         "streetName": resp["logradouro"].title().strip(),  # Formatar
         "number": resp["numero"].upper().strip(),
-        "districtType": None,  # Formatar
+        "districtType": "",  # Formatar
         "district": resp["bairro"].title().strip(),  # Formatar
         "stateCode": resp["uf"].upper().strip(),
-        "cityInternalId": None,  # Formatar
+        "cityInternalId": "",  # Formatar
         "phoneNumber": format_phone(resp["telefone"]),
         "email": resp["email"].lower().strip()
     }
