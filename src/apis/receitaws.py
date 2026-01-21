@@ -1,7 +1,7 @@
 import requests
 
 
-def cnpj_lookup(companyId: str, code: str, type: int, contributor: int, cnpj: str):
+def cnpj_lookup(companyId: str, code: str, type: int, contributor: int, cnpj: str, stateRegister: str = ""):
     formatted_cnpj = cnpj.replace(".", "").replace("/", "").replace("-", "").strip()
     resp = requests.get(f"https://receitaws.com.br/v1/cnpj/{formatted_cnpj}").json()
     
@@ -14,7 +14,7 @@ def cnpj_lookup(companyId: str, code: str, type: int, contributor: int, cnpj: st
         "shortName": resp["fantasia"].title().strip() if resp["fantasia"] else resp["nome"].title().strip(),
         "name": resp["nome"].title().strip(),
         "mainNIF": resp["cnpj"].strip(),
-        "stateRegister": None,
+        "stateRegister": stateRegister,
         "zipCode": resp["cep"].replace(".", "").replace("-", "").strip(),
         "streetType": None,
         "streetName": resp["logradouro"].title().strip(),
