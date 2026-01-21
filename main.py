@@ -4,7 +4,7 @@ from requests.auth import HTTPBasicAuth
 from dotenv import load_dotenv
 
 
-def main(
+def create_new_customer_vendor(
         companyId: str,
         code: str,
         shortName: str,
@@ -77,7 +77,3 @@ def main(
     
     except Exception as e:
         print(f"exception: {e}")
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
