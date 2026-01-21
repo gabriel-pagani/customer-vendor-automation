@@ -45,6 +45,7 @@ def create_new_customer_vendor(
             "entityType": "J",
             "mainNIF": mainNIF,
             "stateRegister": stateRegister,
+            "registerSituation": 1,
             "address": {
                 "zipCode": zipCode,
                 "streetType": streetType,
