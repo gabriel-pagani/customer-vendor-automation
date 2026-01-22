@@ -1,43 +1,32 @@
-from time import sleep
-from apis.customer_vendor import create_new_customer_vendor
-from apis.receitaws import cnpj_lookup
-from database.connection import execute_query
-from constants.customers_vendors import customers_vendors
+import flet as ft
+import os
+from views.home import HomeView
 
 
-for cnpj, infos in customers_vendors.items():
-    try:
-        data = execute_query("""
-            SELECT
-                'F' + RIGHT('00000' + CAST((CAST(SUBSTRING((SELECT TOP 1 CODCFO FROM FCFO WHERE CODCFO LIKE 'F%' AND CODCOLIGADA in (1,5,6) ORDER BY DATACRIACAO DESC, CODCFO DESC), 2, 5) AS INT) + 1) AS VARCHAR), 5) AS COD_FOR,
-                'C' + RIGHT('00000' + CAST((CAST(SUBSTRING((SELECT TOP 1 CODCFO FROM FCFO WHERE CODCFO LIKE 'C%' AND CODCOLIGADA in (1,5,6) ORDER BY DATACRIACAO DESC, CODCFO DESC), 2, 5) AS INT) + 1) AS VARCHAR), 5) AS COD_CLI
-        """)
-        codcfo = data[0][1] if infos[0].lower() == "c" else data[0][0]
+class Main:
+    def __init__(self, page: ft.Page):
+        self.page = page
+        self.setup_page()
+        self.home_view()
+
+    def setup_page(self):
+        async def center_window():
+            await self.page.window.center()
         
-        resp = cnpj_lookup(codcoligada="5", codcfo=codcfo, cnpj=cnpj, ie=infos[1])
+        self.page.title = 'CustomerVendor Automation'
+        self.page.window.icon = os.path.join(os.path.dirname(__file__), "assets", "icon_windows.ico")
+        self.page.run_task(center_window)
+        self.page.theme_mode = ft.ThemeMode.LIGHT
+        self.page.bgcolor = ft.Colors.WHITE
+        self.page.padding = 0
+        self.page.update()
 
-        create_new_customer_vendor(
-            companyId=resp["companyId"],
-            code=resp["code"],
-            shortName=resp["shortName"],
-            name=resp["name"],
-            type=resp["type"],
-            mainNIF=resp["mainNIF"],
-            stateRegister=resp["stateRegister"],
-            zipCode=resp["zipCode"],
-            streetType=resp["streetType"],
-            streetName=resp["streetName"],
-            number=resp["number"],
-            districtType=resp["districtType"],
-            district=resp["district"],
-            stateCode=resp["stateCode"],
-            cityInternalId=resp["cityInternalId"],
-            phoneNumber=resp["phoneNumber"],
-            email=resp["email"],
-            contributor=resp["contributor"]
-        )
+    def home_view(self):
+        HomeView(self.page).show()
 
-        sleep(20)
 
-    except Exception as e:
-        print(f"exception: {e}")
+def main(page: ft.Page):
+    Main(page)
+
+
+ft.run(main, assets_dir="assets")
