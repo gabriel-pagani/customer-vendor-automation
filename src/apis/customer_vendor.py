@@ -76,7 +76,8 @@ def create_new_customer_vendor(
             }
         }
         
-        print(json)
+        resp = session.post(api_url, json=json, timeout=30)
+        resp.raise_for_status()
     
     except Exception as e:
         print({"file": "customer_vendor.py", "exception": e})
