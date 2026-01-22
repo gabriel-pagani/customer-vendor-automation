@@ -71,11 +71,13 @@ def format_district(district: str) -> list:
     if not district:
         return ["", ""]
     
-    district = district.strip().upper()
+    # remove pontuação e normaliza espaços
+    district = re.sub(r"[^\w\s]", " ", district, flags=re.UNICODE)
+    district = re.sub(r"\s+", " ", district).strip().upper()
     district_type = district.split()[0]
     
     if district_type in district_types:
-        district = re.sub(f"{district_type} ", "", district)
+        district = re.sub(rf"^{re.escape(district_type)}\s+", "", district)
         district_type = district_types[district_type]
         return [district_type, district.title()]
     else:
