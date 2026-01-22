@@ -1,5 +1,13 @@
-from utils.formatter import format_name, suffix_remover, format_zipcode, format_street, format_district, format_phone
 import requests
+from utils.formatter import (
+    format_name, 
+    suffix_remover, 
+    format_zipcode, 
+    format_street, 
+    format_district, 
+    format_municipality, 
+    format_phone
+)
 
 
 def cnpj_lookup(codcoligada: str, codcfo: str, cnpj: str, ie: str = ""):
@@ -26,7 +34,7 @@ def cnpj_lookup(codcoligada: str, codcfo: str, cnpj: str, ie: str = ""):
         "districtType": format_district(resp["bairro"])[0],
         "district": format_district(resp["bairro"])[1],
         "stateCode": resp["uf"].upper().strip(),
-        "cityInternalId": "",  # Formatar
+        "cityInternalId": format_municipality(resp["municipio"]),
         "phoneNumber": format_phone(resp["telefone"]),
         "email": resp["email"].lower().strip(),
         "contributor": 2 if ie and "isento" in ie.lower() else (1 if ie else 0)  # 0 = Não contribuinte | 1 = Contribuinte | 2 = Isento
