@@ -12,7 +12,7 @@ for cnpj, infos in customers_vendors.items():
                 'F' + RIGHT('00000' + CAST((CAST(SUBSTRING((SELECT TOP 1 CODCFO FROM FCFO WHERE CODCFO LIKE 'F%' AND CODCOLIGADA in (1,5,6) ORDER BY DATACRIACAO DESC, CODCFO DESC), 2, 5) AS INT) + 1) AS VARCHAR), 5) AS COD_FOR,
                 'C' + RIGHT('00000' + CAST((CAST(SUBSTRING((SELECT TOP 1 CODCFO FROM FCFO WHERE CODCFO LIKE 'C%' AND CODCOLIGADA in (1,5,6) ORDER BY DATACRIACAO DESC, CODCFO DESC), 2, 5) AS INT) + 1) AS VARCHAR), 5) AS COD_CLI
         """)
-        codcfo = data[0][1] if infos[0].lower() == "C" else data[0][0]
+        codcfo = data[0][1] if infos[0].lower() == "c" else data[0][0]
         
         resp = cnpj_lookup(codcoligada="5", codcfo=codcfo, cnpj=cnpj, ie=infos[1])
 
