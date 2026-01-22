@@ -26,4 +26,4 @@ try:
     )
 
 except Exception as e:
-    print({"file": "main.py", "exception": e})
+    print(f"exception: {e}")
