@@ -16,7 +16,7 @@ def cnpj_lookup(codcoligada: str, codcfo: str, cnpj: str, ie: str = ""):
         "code": codcfo,
         "shortName": suffix_remover(format_name(resp["fantasia"])) if resp["fantasia"] else suffix_remover(format_name(resp["nome"])),
         "name": format_name(resp["nome"]),
-        "type": 3 if codcfo.upper().startswith('C') else 2,  # Conferir os tipos de cadastro
+        "type": 1 if codcfo.upper().startswith('C') else (2 if codcfo.upper().startswith('F') else 3),  # 1 = Cliente | 2 = Fornecedor | 3 = Ambos
         "mainNIF": resp["cnpj"].strip(),
         "stateRegister": ie if ie and "isento" not in ie.lower() else "",
         "zipCode": format_zipcode(resp["cep"]),
