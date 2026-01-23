@@ -19,7 +19,7 @@ class HomeView:
                                 ft.Icon(ft.Icons.BUSINESS, color=ft.Colors.GREY_900),
                                 ft.Column(
                                     controls=[
-                                        ft.Text(f"Cnpj: {cnpj}", weight="bold"),
+                                        ft.Text(f"Cnpj: {cnpj[:2]}.{cnpj[2:5]}.{cnpj[5:8]}/{cnpj[8:12]}-{cnpj[12:]}", weight="bold"),
                                         ft.Text(f"Coligada: {data['codcoligada']} | Tipo: {'Cliente' if data['type'] == 'c' else 'Fornecedor'}")
                                     ], 
                                     expand=True
