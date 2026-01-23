@@ -19,7 +19,15 @@ class HomeView:
             ...
 
         # Components
-        ...
+        codcoligada_input = ft.TextField()
+        cnpj_input = ft.TextField()
+        ie_input = ft.TextField()
+        type_input = ft.Dropdown()
+        add_cnpj_button = ft.Button()
+        remove_cnpj_button = ft.Button()
+        start_automation_button = ft.Button()
+        list_of_cnpjs = ft.TextField()
+        logs = ft.TextField()
 
         # Layout
         ...
