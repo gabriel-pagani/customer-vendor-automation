@@ -104,12 +104,14 @@ class HomeView:
             ie_input.disabled = True
             type_input.disabled = True
             add_cnpj_button.disabled = True
+            add_cnpj_button.icon_color = ft.Colors.GREY_300
             add_cnpj_button.tooltip = "Automação em execução!"
             start_automation_button.disabled = True
             start_automation_button.tooltip = "Automação em execução!"
 
             for container in list_of_cnpjs.controls:
                 container.content.controls[2].disabled = True
+                container.content.controls[2].icon_color = ft.Colors.GREY_300
                 container.content.controls[2].tooltip = "Automação em execução!"
             
             self.page.update()
@@ -120,12 +122,14 @@ class HomeView:
             ie_input.disabled = False
             type_input.disabled = False
             add_cnpj_button.disabled = False
+            add_cnpj_button.icon_color = ft.Colors.GREEN
             add_cnpj_button.tooltip = "Adicionar cnpj"
             start_automation_button.disabled = False
             start_automation_button.tooltip = None
 
             for container in list_of_cnpjs.controls:
                 container.content.controls[2].disabled = False
+                container.content.controls[2].icon_color = ft.Colors.RED
                 container.content.controls[2].tooltip = "Remover cnpj"
         
         def add_log(message: str, type: str = "info"):
