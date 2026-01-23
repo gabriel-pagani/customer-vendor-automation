@@ -189,7 +189,6 @@ class HomeView:
                     border_radius=8,
                     padding=5
                 ),
-                ft.Divider(),
                 ft.Text("Logs:", size=16, weight="bold"),
                 ft.Container(
                     content=logs,
