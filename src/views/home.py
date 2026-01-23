@@ -1,4 +1,5 @@
 import flet as ft
+import time
 from utils.ui import show_message
 from utils.validator import is_valid_cnpj
 from apis.receitaws import cnpj_lookup
@@ -112,6 +113,7 @@ class HomeView:
             
             self.page.update()
 
+            len_customers_vendors = len(self.customers_vendors)
             for cnpj, infos in self.customers_vendors.items():
                 try:
                     data = execute_query("""
@@ -146,6 +148,9 @@ class HomeView:
 
                 except Exception as e:
                     print(f"exception: {e}")
+                
+                if len_customers_vendors > 3:
+                        await time.sleep(20)
 
             codcoligada_input.disabled = False
             cnpj_input.disabled = False
