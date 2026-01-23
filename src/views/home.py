@@ -96,7 +96,20 @@ class HomeView:
                 show_message(self.page, 1, "Cnpj removido com sucesso!")
 
         async def run_automation_tesk():
-            ...
+            codcoligada_input.disabled = True
+            cnpj_input.disabled = True
+            ie_input.disabled = True
+            type_input.disabled = True
+            add_cnpj_button.disabled = True
+            add_cnpj_button.tooltip = "Automação em execução!"
+            start_automation_button.disabled = True
+            start_automation_button.tooltip = "Automação em execução!"
+
+            for container in list_of_cnpjs.controls:
+                container.content.controls[2].disabled = True
+                container.content.controls[2].tooltip = "Automação em execução!"
+            
+            self.page.update()
         
         def start_automation(e):
             if not self.customers_vendors:
