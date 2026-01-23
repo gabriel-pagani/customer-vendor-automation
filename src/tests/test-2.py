@@ -1,207 +1,224 @@
 import flet as ft
+import asyncio
 from utils.ui import show_message
 from apis.receitaws import cnpj_lookup
 from apis.customer_vendor import create_new_customer_vendor
 
+
 class HomeView:
     def __init__(self, page: ft.Page):
         self.page = page
-        self.codcoligada = str()
-        self.customers_vendors = dict()
-        
-        self.cnpj_ref = ft.Ref[ft.TextField]()
-        self.ie_ref = ft.Ref[ft.TextField]()
-        self.type_ref = ft.Ref[ft.Dropdown]()
-        self.list_view_ref = ft.Ref[ft.Column]()
-        self.log_ref = ft.Ref[ft.Column]()
-
+        self.customers_vendors = dict()  # Armazena os dados: {cnpj: {dados...}}
+    
     def show(self):
-        # Função para adicionar o item na lista e no dicionário
-        def add_item(e):
-            cnpj = self.cnpj_ref.current.value.strip()
-            ie = self.ie_ref.current.value.strip()
-            type_val = self.type_ref.current.value # "c" ou "f"
+        # Componentes de Lista e Logs definidos antecipadamente para serem usados nas funções
+        list_of_cnpjs = ft.ListView(expand=True, spacing=10)
+        logs = ft.ListView(expand=True, spacing=5, auto_scroll=True)
 
-            if not cnpj or not type_val:
-                self.page.snack_bar = ft.SnackBar(ft.Text("CNPJ e Tipo são obrigatórios!"))
-                self.page.snack_bar.open = True
-                self.page.update()
-                return
-
-            # Adiciona ao dicionário "customers_vendors"
-            self.customers_vendors_data[cnpj] = [type_val, ie]
-
-            # Adiciona visualmente na lista
-            type_label = "Cliente" if type_val == "c" else "Fornecedor"
-            self.list_view_ref.current.controls.append(
-                ft.ListTile(
-                    title=ft.Text(f"CNPJ: {cnpj}"),
-                    subtitle=ft.Text(f"Tipo: {type_label} | IE: {ie if ie else 'Isento/Não informado'}"),
-                    trailing=ft.IconButton(
-                        ft.Icons.DELETE, 
-                        on_click=lambda _, c=cnpj: remove_item(c) # Botão para remover
+        def update_list():
+            list_of_cnpjs.controls.clear()
+            for cnpj, data in self.customers_vendors.items():
+                list_of_cnpjs.controls.append(
+                    ft.Container(
+                        content=ft.Row([
+                            ft.Icon(ft.Icons.BUSINESS, color=ft.Colors.BLUE),
+                            ft.Column([
+                                ft.Text(f"Código: {data['code']} | CNPJ: {cnpj}", weight="bold"),
+                                ft.Text(f"Coligada: {data['codcoligada']} | Tipo: {'Cliente' if data['type'] == 'c' else 'Fornecedor'}")
+                            ], expand=True),
+                            ft.IconButton(
+                                icon=ft.Icons.DELETE,
+                                icon_color=ft.Colors.RED,
+                                tooltip="Remover",
+                                on_click=lambda e, c=cnpj: remove_cnpj(c)
+                            )
+                        ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+                        padding=10,
+                        border=ft.border.all(1, ft.Colors.GREY_300),
+                        border_radius=5
                     )
                 )
-            )
+            self.page.update()
+
+        def add_cnpj(e):
+            if not all([codcoligada_input.value, cnpj_input.value, type_input.value]):
+                show_message(self.page, 2, "Por favor, preencha todos os campos.")
+                return
+
+            cnpj_val = cnpj_input.value.strip()
             
-            # Limpa os campos
-            self.cnpj_ref.current.value = ""
-            self.ie_ref.current.value = ""
-            self.cnpj_ref.current.focus()
-            self.page.update()
-
-        # Função para remover item
-        def remove_item(cnpj_to_remove):
-            if cnpj_to_remove in self.customers_vendors_data:
-                del self.customers_vendors_data[cnpj_to_remove]
-                
-                # Reconstrói a lista visual (simples, mas eficaz para este caso)
-                self.list_view_ref.current.controls.clear()
-                for cnpj, data in self.customers_vendors_data.items():
-                    t_val, ie_val = data
-                    t_label = "Cliente" if t_val == "c" else "Fornecedor"
-                    self.list_view_ref.current.controls.append(
-                        ft.ListTile(
-                            title=ft.Text(f"CNPJ: {cnpj}"),
-                            subtitle=ft.Text(f"Tipo: {t_label} | IE: {ie_val}"),
-                            trailing=ft.IconButton(ft.Icons.DELETE, on_click=lambda _, c=cnpj: remove_item(c))
-                        )
-                    )
-                self.page.update()
-
-        # Função principal de automação
-        def start_automation(e):
-            cod_coligada = self.codcoligada.current.value
-            if not cod_coligada:
-                show_message(self.page, "Erro", "Por favor, informe o ID da Coligada.")
+            if cnpj_val in self.customers_vendors:
+                show_message(self.page, 2, "Este CNPJ já foi adicionado.")
                 return
 
-            if not self.customers_vendors_data:
-                show_message(self.page, "Aviso", "A lista de cadastro está vazia.")
+            self.customers_vendors[cnpj_val] = {
+                "codcoligada": codcoligada_input.value,
+                "ie": ie_input.value.strip() if ie_input.value else "",
+                "type": type_input.value
+            }
+            
+            # Limpa campos opcionais ou de texto simples para facilitar nova entrada
+            cnpj_input.value = ""
+            ie_input.value = ""
+            # code_input.value = "" # Opcional: limpar ou manter o código para sequencia
+            cnpj_input.focus()
+            
+            update_list()
+            show_message(self.page, 1, "CNPJ adicionado com sucesso!")
+
+        def remove_cnpj(cnpj):
+            if cnpj in self.customers_vendors:
+                del self.customers_vendors[cnpj]
+                update_list()
+                show_message(self.page, 4, "Item removido.")
+
+        async def run_automation_task():
+            if not self.customers_vendors:
+                show_message(self.page, 2, "A lista está vazia.")
                 return
 
-            self.log_ref.current.controls.clear()
-            self.log_ref.current.controls.append(ft.Text("Iniciando automação...", color="blue", weight="bold"))
+            start_automation_button.disabled = True
             self.page.update()
 
-            # Itera sobre o dicionário criado (igual ao customers_vendors.py)
-            for cnpj, data in self.customers_vendors_data.items():
-                cod_cfo = data[0] # "c" ou "f"
-                inscricao_estadual = data[1]
+            logs.controls.append(ft.Text("Iniciando automação...", color=ft.Colors.BLUE))
+            self.page.update()
 
+            for cnpj, data in self.customers_vendors.items():
                 try:
-                    self.log_ref.current.controls.append(ft.Text(f"Consultando CNPJ: {cnpj}..."))
+                    logs.controls.append(ft.Text(f"Processando CNPJ: {cnpj}...", italic=True))
                     self.page.update()
 
-                    # 1. Consulta na ReceitaWS
-                    # Note que a função cnpj_lookup espera (codcoligada, codcfo, cnpj, ie)
-                    customer_data = cnpj_lookup(cod_coligada, cod_cfo, cnpj, inscricao_estadual)
-                    
-                    self.log_ref.current.controls.append(ft.Text(f"Dados obtidos: {customer_data['name']}"))
-                    self.page.update()
-
-                    # 2. Envia para a API do ERP
-                    create_new_customer_vendor(
-                        companyId=customer_data["companyId"],
-                        code=customer_data["code"],
-                        shortName=customer_data["shortName"],
-                        name=customer_data["name"],
-                        type=customer_data["type"],
-                        mainNIF=customer_data["mainNIF"],
-                        stateRegister=customer_data["stateRegister"],
-                        zipCode=customer_data["zipCode"],
-                        streetType=customer_data["streetType"],
-                        streetName=customer_data["streetName"],
-                        number=customer_data["number"],
-                        districtType=customer_data["districtType"],
-                        district=customer_data["district"],
-                        stateCode=customer_data["stateCode"],
-                        cityInternalId=customer_data["cityInternalId"],
-                        phoneNumber=customer_data["phoneNumber"],
-                        email=customer_data["email"],
-                        contributor=customer_data["contributor"]
+                    # 1. Consulta ReceitaWS (Executado em thread para não travar UI)
+                    api_data = await asyncio.to_thread(
+                        cnpj_lookup, 
+                        codcoligada=data['codcoligada'],
+                        codcfo=data['code'],
+                        cnpj=cnpj,
+                        ie=data['ie']
                     )
 
-                    self.log_ref.current.controls.append(ft.Text(f"Sucesso: {cnpj} cadastrado!", color="green"))
-                
+                    # 2. Cria Cliente/Fornecedor no ERP
+                    await asyncio.to_thread(
+                        create_new_customer_vendor, 
+                        **api_data
+                    )
+
+                    logs.controls.append(ft.Text(f"✅ Sucesso: {data['code']} - {api_data['name']}", color=ft.Colors.GREEN))
+
                 except Exception as ex:
-                    self.log_ref.current.controls.append(ft.Text(f"Erro ao processar {cnpj}: {str(ex)}", color="red"))
+                    logs.controls.append(ft.Text(f"❌ Erro no CNPJ {cnpj}: {str(ex)}", color=ft.Colors.RED))
                 
                 self.page.update()
-            
-            self.log_ref.current.controls.append(ft.Text("Processo finalizado.", weight="bold"))
+
+            logs.controls.append(ft.Text("Automação finalizada.", weight="bold"))
+            start_automation_button.disabled = False
             self.page.update()
 
-        # Layout da Interface
-        self.page.clean()
-        
-        # Campos de Input
-        input_container = ft.Container(
-            content=ft.Column([
-                ft.Text("Configuração Inicial", size=20, weight="bold"),
-                ft.TextField(ref=self.codcoligada, label="ID da Coligada (Ex: 1)", width=200),
-                
-                ft.Divider(),
-                
-                ft.Text("Adicionar Cliente/Fornecedor", size=18),
-                ft.Row([
-                    ft.TextField(ref=self.cnpj_ref, label="CNPJ", expand=True),
-                    ft.TextField(ref=self.ie_ref, label="Inscrição Estadual (Opcional)", expand=True),
-                    ft.Dropdown(
-                        ref=self.type_ref, 
-                        label="Tipo",
-                        width=150,
-                        options=[
-                            ft.dropdown.Option("c", "Cliente"),
-                            ft.dropdown.Option("f", "Fornecedor"),
-                        ]
-                    ),
-                    ft.ElevatedButton("Adicionar", icon=ft.Icons.ADD, on_click=add_item)
-                ])
-            ]),
-            padding=20,
-            bgcolor=ft.Colors.GREY_100,
-            border_radius=10
+        def start_automation(e):
+            self.page.run_task(run_automation_task)
+
+        # Components
+        codcoligada_input = ft.Dropdown(
+            label="Affiliate",
+            width=150,
+            options=[
+                ft.dropdown.Option("5", "Sinasc"),
+                ft.dropdown.Option("6", "ICD"),
+                ft.dropdown.Option("1", "BRS"),
+            ]
         )
 
-        # Botão de Ação Principal
-        action_button = ft.Button(
-            "Iniciar Automação", 
-            icon=ft.Icons.PLAY_ARROW, 
-            style=ft.ButtonStyle(bgcolor="blue", color="white"),
+        cnpj_input = ft.TextField(
+            label="Cnpj",
+            expand=True,
+            on_submit=add_cnpj,
+        )
+
+        ie_input = ft.TextField(
+            label="IE",
+            expand=True,
+            on_submit=add_cnpj,
+        )
+
+        type_input = ft.Dropdown(
+            label="Type",
+            width=150,
+            options=[
+                ft.dropdown.Option("c", "Customer"),
+                ft.dropdown.Option("f", "Vendor"),
+            ]
+        )
+
+        add_cnpj_button = ft.IconButton(
+            icon=ft.Icons.ADD_CIRCLE,
+            icon_color=ft.Colors.GREY_900,
+            icon_size=40,
+            tooltip="Add cnpj",
+            on_click=add_cnpj,
+        )
+
+        start_automation_button = ft.Button(
+            content=ft.Text("Start automation"),
             height=50,
-            on_click=start_automation
-        )
-
-        # Área de Lista e Logs
-        display_area = ft.Row([
-            ft.Container(
-                content=ft.Column([
-                    ft.Text("Fila de Cadastro", weight="bold"),
-                    ft.Column(ref=self.list_view_ref, scroll=ft.ScrollMode.AUTO, height=300)
-                ]),
-                expand=True,
-                border=ft.border.all(1, "grey"),
-                border_radius=5,
-                padding=10
+            bgcolor=ft.Colors.GREY_900,
+            color=ft.Colors.WHITE,
+            style=ft.ButtonStyle(
+                shape=ft.RoundedRectangleBorder(radius=8)
             ),
-            ft.Container(
-                content=ft.Column([
-                    ft.Text("Logs de Execução", weight="bold"),
-                    ft.Column(ref=self.log_ref, scroll=ft.ScrollMode.AUTO, height=300)
-                ]),
-                expand=True,
-                border=ft.border.all(1, "grey"),
-                border_radius=5,
-                padding=10
-            )
-        ], expand=True)
-
-        self.page.add(
-            ft.Column([
-                input_container,
-                ft.Container(content=action_button, alignment=ft.Alignment.CENTER, padding=10),
-                display_area
-            ], expand=True, spacing=20)
+            on_click=start_automation, # Corrigido: chama a função de automação
         )
-        self.page.update()
+
+        # Layout
+        cnpj_form = ft.Row(
+            controls=[
+                codcoligada_input,
+                cnpj_input,
+                ie_input,
+                type_input,
+                add_cnpj_button,
+            ],
+            alignment=ft.MainAxisAlignment.CENTER
+        )
+
+        column = ft.Column(
+            controls=[
+                ft.Container(
+                    content=cnpj_form,
+                    padding=10,
+                    bgcolor=ft.Colors.GREY_100,
+                    border_radius=10
+                ),
+                ft.Divider(),
+                ft.Text("Lista de Processamento:", size=16, weight="bold"),
+                ft.Container(
+                    content=list_of_cnpjs,
+                    expand=True, # Ocupa o espaço disponível
+                    border=ft.Border.all(1, ft.Colors.GREY_300),
+                    border_radius=8,
+                    padding=5
+                ),
+                ft.Divider(),
+                ft.Text("Logs:", size=16, weight="bold"),
+                ft.Container(
+                    content=logs,
+                    height=150, # Altura fixa para os logs
+                    bgcolor=ft.Colors.BLACK_12,
+                    border_radius=8,
+                    padding=10
+                ),
+                ft.Container(
+                    content=start_automation_button,
+                    padding=ft.Padding.only(top=10)
+                ),
+            ],
+            expand=True
+        )
+
+        container = ft.Container(
+            content=column,
+            padding=20,
+            expand=True
+        )
+
+        self.page.clean()
+        self.page.add(container)
