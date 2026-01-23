@@ -20,7 +20,7 @@ class HomeView:
                                 ft.Column(
                                     controls=[
                                         ft.Text(f"Cnpj: {cnpj[:2]}.{cnpj[2:5]}.{cnpj[5:8]}/{cnpj[8:12]}-{cnpj[12:]}", weight="bold"),
-                                        ft.Text( f"Coligada: {"Sinasc" if data["codcoligada"] == "5" else ("ICD" if data["codcoligada"] == "6" else "BRS")} | Tipo: {"Cliente" if data["type"] == "c" else "Fornecedor"}" if not data["ie"] else f"Coligada: {"Sinasc" if data["codcoligada"] == "5" else ("ICD" if data["codcoligada"] == "6" else "BRS")} | Tipo: {"Cliente" if data["type"] == "c" else "Fornecedor"} | IE: {data["ie"]}")
+                                        ft.Text(f"Coligada: {"Sinasc" if data["codcoligada"] == "5" else ("ICD" if data["codcoligada"] == "6" else "BRS")} | Tipo: {"Cliente" if data["type"] == "c" else "Fornecedor"} | IE: {data["ie"]}" if data["ie"] else "N/A")
                                     ], 
                                     expand=True
                                 ),
