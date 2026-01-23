@@ -93,8 +93,12 @@ class HomeView:
                 update_list_of_cnpjs()
                 show_message(self.page, 1, "Cnpj removido com sucesso!")
 
+        async def run_automation_tesk():
+            ...
+        
         def start_automation(e):
             ...
+
 
         # Components
         codcoligada_input = ft.Dropdown(
