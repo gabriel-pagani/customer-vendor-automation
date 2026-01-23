@@ -1,8 +1,10 @@
 import flet as ft
+import time
 from utils.ui import show_message
 from utils.validator import is_valid_cnpj
 from apis.receitaws import cnpj_lookup
 from apis.customer_vendor import create_new_customer_vendor
+from database.connection import execute_query
 
 
 class HomeView:
@@ -110,6 +112,61 @@ class HomeView:
                 container.content.controls[2].tooltip = "Automação em execução!"
             
             self.page.update()
+
+            len_customers_vendors = len(self.customers_vendors)
+            for cnpj, infos in self.customers_vendors.items():
+                try:
+                    data = execute_query("""
+                        SELECT
+                            'F' + RIGHT('00000' + CAST((CAST(SUBSTRING((SELECT TOP 1 CODCFO FROM FCFO WHERE CODCFO LIKE 'F%' AND CODCOLIGADA in (1,5,6) ORDER BY DATACRIACAO DESC, CODCFO DESC), 2, 5) AS INT) + 1) AS VARCHAR), 5) AS COD_FOR,
+                            'C' + RIGHT('00000' + CAST((CAST(SUBSTRING((SELECT TOP 1 CODCFO FROM FCFO WHERE CODCFO LIKE 'C%' AND CODCOLIGADA in (1,5,6) ORDER BY DATACRIACAO DESC, CODCFO DESC), 2, 5) AS INT) + 1) AS VARCHAR), 5) AS COD_CLI
+                    """)
+                    codcfo = data[0][1] if infos["type"].lower() == "c" else data[0][0]
+                    
+                    resp = cnpj_lookup(codcoligada=infos["codcoligada"], codcfo=codcfo, cnpj=cnpj, ie=infos["ie"])
+
+                    create_new_customer_vendor(
+                        companyId=resp["companyId"],
+                        code=resp["code"],
+                        shortName=resp["shortName"],
+                        name=resp["name"],
+                        type=resp["type"],
+                        mainNIF=resp["mainNIF"],
+                        stateRegister=resp["stateRegister"],
+                        zipCode=resp["zipCode"],
+                        streetType=resp["streetType"],
+                        streetName=resp["streetName"],
+                        number=resp["number"],
+                        districtType=resp["districtType"],
+                        district=resp["district"],
+                        stateCode=resp["stateCode"],
+                        cityInternalId=resp["cityInternalId"],
+                        phoneNumber=resp["phoneNumber"],
+                        email=resp["email"],
+                        contributor=resp["contributor"]
+                    )
+
+                    if len_customers_vendors > 3:
+                        time.sleep(20)
+
+                except Exception as e:
+                    print(f"exception: {e}")
+
+            codcoligada_input.disabled = False
+            cnpj_input.disabled = False
+            ie_input.disabled = False
+            type_input.disabled = False
+            add_cnpj_button.disabled = False
+            add_cnpj_button.tooltip = "Adicionar cnpj"
+            start_automation_button.disabled = False
+            start_automation_button.tooltip = None
+
+            for container in list_of_cnpjs.controls:
+                container.content.controls[2].disabled = False
+                container.content.controls[2].tooltip = "Remover cnpj"
+            
+            self.page.update()
+            show_message(self.page, 1, "Automação finalizada!")
         
         def start_automation(e):
             if not self.customers_vendors:
