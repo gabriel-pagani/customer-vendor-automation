@@ -41,6 +41,7 @@ class HomeView:
         column = ft.Column(
             controls=[
                 cnpj_form,
+                start_automation_button,
             ]
         )
 
