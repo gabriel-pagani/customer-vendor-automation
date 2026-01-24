@@ -26,7 +26,7 @@ class HomeView:
                                 ft.Column(
                                     controls=[
                                         ft.Text(f"Cnpj: {cnpj[:2]}.{cnpj[2:5]}.{cnpj[5:8]}/{cnpj[8:12]}-{cnpj[12:]}", weight="bold"),
-                                        ft.Text(f"Coligada: {"Sinasc" if data["codcoligada"] == "5" else ("ICD" if data["codcoligada"] == "6" else "BRS")} | Tipo: {"Cliente" if data["type"] == "c" else "Fornecedor"} | IE: {data["ie"]}" if data["ie"] else f"Coligada: {"Sinasc" if data["codcoligada"] == "5" else ("ICD" if data["codcoligada"] == "6" else "BRS")} | Tipo: {"Cliente" if data["type"] == "c" else "Fornecedor"}")
+                                        ft.Text(f"Tipo: {"Cliente" if data["type"] == "c" else ("Fornecedor" if data["type"] == "f" else "Ambos")} | IE: {data["ie"]}" if data["ie"] else f"Tipo: {"Cliente" if data["type"] == "c" else ("Fornecedor" if data["type"] == "f" else "Ambos")}")
                                     ], 
                                     expand=True
                                 ),
@@ -48,15 +48,10 @@ class HomeView:
             self.page.update()
 
         def add_cnpj_to_list(e):
-            codcoligada_input.error_text = None
             cnpj_input.error = None
             type_input.error_text = None
             
             has_error = False
-
-            if not codcoligada_input.value:
-                codcoligada_input.error_text = "Campo obrigatório!"
-                has_error = True
 
             if not cnpj_input.value:
                 cnpj_input.error = "Campo obrigatório!"
@@ -75,14 +70,12 @@ class HomeView:
                 has_error = True
 
             if has_error:
-                codcoligada_input.update()
                 cnpj_input.update()
                 type_input.update()
                 return
 
 
             self.customers_vendors[cnpj_input.value.strip()] = {
-                "codcoligada": codcoligada_input.value,
                 "ie": ie_input.value.strip() if ie_input.value else "",
                 "type": type_input.value
             }
@@ -100,7 +93,6 @@ class HomeView:
                 show_message(self.page, 1, "Cnpj removido com sucesso!")
 
         def disable_ui():
-            codcoligada_input.disabled = True
             cnpj_input.disabled = True
             ie_input.disabled = True
             type_input.disabled = True
@@ -118,7 +110,6 @@ class HomeView:
             self.page.update()
 
         def enable_ui():
-            codcoligada_input.disabled = False
             cnpj_input.disabled = False
             ie_input.disabled = False
             type_input.disabled = False
@@ -163,32 +154,34 @@ class HomeView:
                     data = execute_query("""
                         SELECT
                             'F' + RIGHT('00000' + CAST((CAST(SUBSTRING((SELECT TOP 1 CODCFO FROM FCFO WHERE CODCFO LIKE 'F%' AND CODCOLIGADA in (1,5,6) ORDER BY DATACRIACAO DESC, CODCFO DESC), 2, 5) AS INT) + 1) AS VARCHAR), 5) AS COD_FOR,
-                            'C' + RIGHT('00000' + CAST((CAST(SUBSTRING((SELECT TOP 1 CODCFO FROM FCFO WHERE CODCFO LIKE 'C%' AND CODCOLIGADA in (1,5,6) ORDER BY DATACRIACAO DESC, CODCFO DESC), 2, 5) AS INT) + 1) AS VARCHAR), 5) AS COD_CLI
+                            'C' + RIGHT('00000' + CAST((CAST(SUBSTRING((SELECT TOP 1 CODCFO FROM FCFO WHERE CODCFO LIKE 'C%' AND CODCOLIGADA in (1,5,6) ORDER BY DATACRIACAO DESC, CODCFO DESC), 2, 5) AS INT) + 1) AS VARCHAR), 5) AS COD_CLI,
+                            'A' + RIGHT('00000' + CAST((CAST(SUBSTRING((SELECT TOP 1 CODCFO FROM FCFO WHERE CODCFO LIKE 'A%' AND CODCOLIGADA in (1,5,6) ORDER BY DATACRIACAO DESC, CODCFO DESC), 2, 5) AS INT) + 1) AS VARCHAR), 5) AS COD_CLIFOR
                     """)
-                    codcfo = data[0][1] if infos["type"].lower() == "c" else data[0][0]
+                    codcfo = data[0][0] if infos["type"].lower() == "f" else (data[0][1] if infos["type"].lower() == "c" else data[0][2])
                     
-                    resp = cnpj_lookup(codcoligada=infos["codcoligada"], codcfo=codcfo, cnpj=cnpj, ie=infos["ie"])
+                    for idx in ["1", "5", "6"]:
+                        resp = cnpj_lookup(codcoligada=idx, codcfo=codcfo, cnpj=cnpj, ie=infos["ie"])
 
-                    create_new_customer_vendor(
-                        companyId=resp["companyId"],
-                        code=resp["code"],
-                        shortName=resp["shortName"],
-                        name=resp["name"],
-                        type=resp["type"],
-                        mainNIF=resp["mainNIF"],
-                        stateRegister=resp["stateRegister"],
-                        zipCode=resp["zipCode"],
-                        streetType=resp["streetType"],
-                        streetName=resp["streetName"],
-                        number=resp["number"],
-                        districtType=resp["districtType"],
-                        district=resp["district"],
-                        stateCode=resp["stateCode"],
-                        cityInternalId=resp["cityInternalId"],
-                        phoneNumber=resp["phoneNumber"],
-                        email=resp["email"],
-                        contributor=resp["contributor"]
-                    )
+                        create_new_customer_vendor(
+                            companyId=resp["companyId"],
+                            code=resp["code"],
+                            shortName=resp["shortName"],
+                            name=resp["name"],
+                            type=resp["type"],
+                            mainNIF=resp["mainNIF"],
+                            stateRegister=resp["stateRegister"],
+                            zipCode=resp["zipCode"],
+                            streetType=resp["streetType"],
+                            streetName=resp["streetName"],
+                            number=resp["number"],
+                            districtType=resp["districtType"],
+                            district=resp["district"],
+                            stateCode=resp["stateCode"],
+                            cityInternalId=resp["cityInternalId"],
+                            phoneNumber=resp["phoneNumber"],
+                            email=resp["email"],
+                            contributor=resp["contributor"]
+                        )
 
                     add_log(f"Sucesso ao cadastrar o cliente/fornecedor {cnpj[:2]}.{cnpj[2:5]}.{cnpj[5:8]}/{cnpj[8:12]}-{cnpj[12:]}! CODCFO: {codcfo}", "success")
 
@@ -221,20 +214,8 @@ class HomeView:
 
 
         # Components
-        codcoligada_input = ft.Dropdown(
-            label="Coligada",
-            width=200,
-            border_color=ft.Colors.GREY_300,
-            focused_border_color=ft.Colors.GREY_300,
-            options=[
-                ft.dropdown.Option("5", "Sinasc"),
-                ft.dropdown.Option("6", "ICD"),
-                ft.dropdown.Option("1", "BRS"),
-            ]
-        )
-
         cnpj_input = ft.TextField(
-            label="Cnpj",
+            label="CNPJ",
             expand=True,
             border_color=ft.Colors.GREY_300,
             focused_border_color=ft.Colors.GREY_300,
@@ -258,6 +239,7 @@ class HomeView:
             options=[
                 ft.dropdown.Option("c", "Cliente"),
                 ft.dropdown.Option("f", "Fornecedor"),
+                ft.dropdown.Option("a", "Ambos"),
             ]
         )
 
@@ -295,7 +277,6 @@ class HomeView:
         # Layout
         cnpj_form = ft.Row(
             controls=[
-                codcoligada_input,
                 cnpj_input,
                 ie_input,
                 type_input,
