@@ -11,7 +11,7 @@ from utils.formatter import (
 )
 
 
-def cnpj_lookup(codcoligada: str, codcfo: str, cnpj: str, ie: str = ""):
+def cnpj_lookup(codcfo: str, cnpj: str, ie: str = ""):
     formatted_cnpj = cnpj.replace(".", "").replace("/", "").replace("-", "").strip()
     r = requests.get(f"https://receitaws.com.br/v1/cnpj/{formatted_cnpj}", timeout=30)
     r.raise_for_status()
@@ -21,7 +21,6 @@ def cnpj_lookup(codcoligada: str, codcfo: str, cnpj: str, ie: str = ""):
         raise RuntimeError(resp.get("message"))
 
     response = {
-        "companyId": codcoligada,
         "code": codcfo,
         "shortName": suffix_remover(format_name(resp["fantasia"])) if resp["fantasia"] else suffix_remover(format_name(resp["nome"])),
         "name": format_name(resp["nome"]),
