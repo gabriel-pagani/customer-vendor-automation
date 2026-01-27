@@ -18,7 +18,7 @@ python -m pip install --upgrade pip && pip install -r requirements.txt
 
 #### 3. Build o app
 ```
-pyinstaller --onefile --noconsole --name Customer_Vendor --icon src/assets/icon_windows.ico src/main.py
+pyinstaller --onefile --noconsole --name "Customer Vendor" --icon src/assets/icon_windows.ico src/main.py
 ```
 
 # License
