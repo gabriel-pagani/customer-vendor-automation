@@ -199,7 +199,13 @@ class HomeView:
                             contributor=resp["contributor"]
                         )
 
-                    execute_query("UPDATE FCFO SET CONTRIBUINTE = ? WHERE CODCOLIGADA IN (1,5,6) AND CGCCFO = ?", (resp["contributor"], formatted_cnpj))
+                    execute_query(
+                        "UPDATE FCFO SET CONTRIBUINTE = ? WHERE CODCOLIGADA IN (1,5,6) AND CGCCFO = ?", 
+                        (
+                            resp["contributor"], 
+                            formatted_cnpj
+                        )
+                    )
 
                     add_log(f"Sucesso ao cadastrar o cliente/fornecedor {cnpj[:2]}.{cnpj[2:5]}.{cnpj[5:8]}/{cnpj[8:12]}-{cnpj[12:]}! CODCFO: {codcfo}", "success")
 
