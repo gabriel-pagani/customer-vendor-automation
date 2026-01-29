@@ -338,7 +338,7 @@ class HomeView:
         )
 
         import_cnpjs_button = ft.IconButton(
-            icon=ft.Icons.UPLOAD,
+            icon=ft.Icons.UPLOAD_FILE_ROUNDED,
             icon_color=ft.Colors.BLUE,
             icon_size=40,
             tooltip="Importar lista de cnpjs",
