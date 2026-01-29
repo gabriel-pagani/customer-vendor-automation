@@ -122,7 +122,6 @@ class HomeView:
             except Exception as e:
                 show_message(self.page, 3, f"Erro ao importar lista de cnpjs: {e}")
                 return
-            ...
 
         def remove_cnpj_from_list(cnpj):
             if cnpj in self.customers_vendors:
