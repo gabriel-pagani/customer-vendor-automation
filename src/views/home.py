@@ -264,6 +264,9 @@ class HomeView:
                     
                     resp = cnpj_lookup(codcfo=codcfo, cnpj=cnpj, ie=infos["ie"])
                     
+                    if resp["status"].upper() != "ATIVA":
+                        raise Exception(f"CNPJ com situação irregular")
+
                     for idx in ["1", "5", "6"]:
                         create_new_customer_vendor(
                             companyId=idx,
