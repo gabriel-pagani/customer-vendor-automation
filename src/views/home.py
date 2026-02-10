@@ -209,7 +209,7 @@ class HomeView:
             len_customers_vendors = len(self.customers_vendors)
 
             if len_customers_vendors > 3:
-                total_seconds = len_customers_vendors * 25
+                total_seconds = len_customers_vendors * 24
 
                 hours = total_seconds // 3600
                 remaining_seconds = total_seconds % 3600
