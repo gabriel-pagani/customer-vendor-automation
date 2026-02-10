@@ -21,6 +21,7 @@ def cnpj_lookup(codcfo: str, cnpj: str, ie: str = ""):
         raise RuntimeError(resp.get("message"))
 
     response = {
+        "status": resp["situacao"],
         "code": codcfo,
         "shortName": suffix_remover(format_name(resp["fantasia"])) if resp["fantasia"] else suffix_remover(format_name(resp["nome"])),
         "name": format_name(resp["nome"]),
