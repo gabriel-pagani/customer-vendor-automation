@@ -435,7 +435,7 @@ class HomeView:
                 ft.Text("Logs:", size=16, weight="bold", color=ft.Colors.GREY_900),
                 ft.Container(
                     content=logs,
-                    height=150,
+                    expand=True,
                     border=ft.Border.all(1, ft.Colors.GREY_300),
                     border_radius=8,
                     padding=10
