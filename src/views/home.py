@@ -206,34 +206,6 @@ class HomeView:
             add_log("Iniciando automação...", "info")
             await asyncio.sleep(0.1)
             
-            len_customers_vendors = len(self.customers_vendors)
-
-            if len_customers_vendors > 3:
-                total_seconds = len_customers_vendors * 24
-
-                hours = total_seconds // 3600
-                remaining_seconds = total_seconds % 3600
-                minutes = remaining_seconds // 60
-                seconds = remaining_seconds % 60
-
-                parts = []
-
-                if hours > 0:
-                    parts.append(f"{hours} hora" if hours == 1 else f"{hours} horas")
-
-                if minutes > 0:
-                    parts.append(f"{minutes} minuto" if minutes == 1 else f"{minutes} minutos")
-
-                if seconds > 0 or not parts:
-                    parts.append(f"{seconds} segundo" if seconds == 1 else f"{seconds} segundos")
-
-                duration_text = " e ".join(parts)
-
-                add_log(f"Duração prevista: {duration_text}", "info")
-            else:
-                add_log(f"Duração prevista: 10 segundos", "info")
-            await asyncio.sleep(0.1)
-
             for i, (cnpj, infos) in enumerate(self.customers_vendors.items()):
                 formatted_cnpj = f"{cnpj[:2]}.{cnpj[2:5]}.{cnpj[5:8]}/{cnpj[8:12]}-{cnpj[12:]}"
                 
@@ -310,10 +282,6 @@ class HomeView:
                         add_log(f"Erro ao cadastrar o fornecedor {cnpj[:2]}.{cnpj[2:5]}.{cnpj[5:8]}/{cnpj[8:12]}-{cnpj[12:]}! ERRO: {e}", "error")
                 
                 await asyncio.sleep(0.1)
-                
-                if len_customers_vendors > 3 and i < len_customers_vendors - 1:
-                    add_log("Aguardando 20s...", "info")
-                    await asyncio.sleep(20)
 
             enable_ui()
 
